@@ -71,7 +71,7 @@ myshop/
 ## Статус реалізації
 
 - [x] Етап 1 — Скелет проєкту, Docker (dev), налаштування dev/prod, CI-заглушка
-- [ ] Етап 2 — Моделі даних
+- [x] Етап 2 — Моделі даних (Category, Product, Cart/CartItem, Order/OrderItem, Review, Profile)
 - [ ] Етап 3–4 — API каталогу, товару, відгуків
 - [ ] Етап 5–6 — API кошика, користувачів
 - [ ] Етап 7 — API замовлень, permissions, Swagger

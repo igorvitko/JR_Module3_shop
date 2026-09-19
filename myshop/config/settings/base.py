@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Підвантажуємо змінні з .env у os.environ до того, як почнемо їх читати нижче.
+# У Docker-контейнері .env передається через env_file/environment, тож цей
+# виклик там просто нічого не знайде і мовчки пропуститься — це нормально.
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me-in-env")
