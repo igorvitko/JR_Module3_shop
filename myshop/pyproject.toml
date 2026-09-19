@@ -1,0 +1,47 @@
+[project]
+name = "myshop"
+version = "0.1.0"
+description = "E-commerce store backend (Django + DRF) with a React frontend"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.0,<5.1",
+    "djangorestframework>=3.15,<3.16",
+    "djangorestframework-simplejwt>=5.3,<5.4",
+    "django-filter>=24.2,<25.0",
+    "drf-spectacular>=0.27,<0.28",
+    "django-cors-headers>=4.4,<4.5",
+    "psycopg[binary]>=3.2,<3.3",
+    "python-dotenv>=1.0,<1.1",
+    "Pillow>=10.4,<11.0",
+    "gunicorn>=22.0,<23.0",
+    "whitenoise>=6.7,<6.8",
+]
+
+# Не є пакетом, який потрібно збирати/публікувати — лише застосунок.
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2,<9.0",
+    "pytest-django>=4.8,<5.0",
+    "factory-boy>=3.3,<3.4",
+    "flake8>=7.1,<7.2",
+    "mypy>=1.11,<1.12",
+    "django-stubs[compatible-mypy]>=5.0,<5.1",
+    "djangorestframework-stubs>=3.15,<3.16",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+addopts = "-ra"
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+python_version = "3.12"
+ignore_missing_imports = true
+exclude = ["migrations/"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"
