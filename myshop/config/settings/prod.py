@@ -9,6 +9,19 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = False
 
+# Стиснене сховище з маніфестом — лише для prod, де перед запуском
+# гарантовано виконується `collectstatic` (див. Dockerfile/entrypoint,
+# буде додано на Етапі 14). У dev цей маніфест не генерується, і будь-яка
+# сторінка з {% static %} (наприклад, /admin/) впала б з ValueError.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")

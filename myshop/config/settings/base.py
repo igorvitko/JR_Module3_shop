@@ -61,7 +61,7 @@ TEMPLATES = [
         # Django-шаблони потрібні лише для вбудованої /admin/ панелі —
         # основний веб-інтерфейс реалізовано окремо на React (SPA),
         # який ходить у ті самі REST API, що й зовнішні клієнти.
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -102,7 +102,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -139,9 +138,33 @@ SIMPLE_JWT = {
 # --- drf-spectacular (Swagger/OpenAPI) ---
 SPECTACULAR_SETTINGS = {
     "TITLE": "Myshop API",
-    "DESCRIPTION": "REST API для інтернет-магазину Myshop (Django + DRF).",
+    "DESCRIPTION": """
+REST API для інтернет-магазину Myshop (Django + DRF).
+
+## Авторизація (JWT)
+
+1. **Реєстрація**: `POST /api/users/register/` — username, email, password, password2.
+2. **Логін**: `POST /api/users/login/` — username + password → `{"access": "...", "refresh": "..."}`.
+3. Передавайте access-токен у заголовку кожного захищеного запиту:
+   `Authorization: Bearer <access>`. Час життя — 15 хв.
+4. Коли access протухне — `POST /api/users/login/refresh/` з `{"refresh": "..."}`
+   поверне новий access (refresh живе 7 днів, ротується при кожному оновленні).
+
+Натисніть **Authorize** вгорі цієї сторінки і вставте access-токен, щоб
+тестувати захищені ендпоінти прямо тут.
+
+## Кошик для неавторизованих користувачів
+
+Кошик гостя ідентифікується заголовком `X-Cart-Token` (не JWT). Токен
+повертається в кожній відповіді `/api/cart/` у полі `"token"` — збережіть
+його (наприклад, у localStorage) і передавайте в наступних запитах. Коли
+гість авторизується і передає той самий `X-Cart-Token`, кошик автоматично
+зливається з постійним кошиком користувача.
+""",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "CONTACT": {"name": "Myshop"},
+    "LICENSE": {"name": "MIT"},
 }
 
 # --- Email (перевизначається у dev.py / prod.py) ---

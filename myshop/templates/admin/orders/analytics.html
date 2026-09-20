@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<div style="display:flex; gap:24px; margin-bottom:24px; flex-wrap:wrap;">
+  <div class="module" style="padding:16px; min-width:200px;">
+    <h2>Загальний виторг</h2>
+    <p style="font-size:28px; font-weight:bold;">{{ total_revenue }} грн</p>
+    <p style="color:#666;">Замовлення в статусах: оплачено / відправлено / доставлено</p>
+  </div>
+  <div class="module" style="padding:16px; min-width:200px;">
+    <h2>Середній чек</h2>
+    <p style="font-size:28px; font-weight:bold;">{{ average_order_value|floatformat:2 }} грн</p>
+  </div>
+  <div class="module" style="padding:16px; min-width:200px;">
+    <h2>Оплачених замовлень</h2>
+    <p style="font-size:28px; font-weight:bold;">{{ paid_orders_count }}</p>
+  </div>
+</div>
+
+<div class="module" style="padding:16px; margin-bottom:24px;">
+  <h2>Замовлення за статусами</h2>
+  <table>
+    <thead><tr><th>Статус</th><th>Кількість</th></tr></thead>
+    <tbody>
+      {% for row in orders_by_status %}
+        <tr><td>{{ row.label }}</td><td>{{ row.count }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="module" style="padding:16px;">
+  <h2>Топ-5 товарів за кількістю продажів</h2>
+  <table>
+    <thead><tr><th>Товар</th><th>Продано, шт.</th><th>Виторг</th></tr></thead>
+    <tbody>
+      {% for row in top_products %}
+        <tr>
+          <td>{{ row.product_name }}</td>
+          <td>{{ row.total_quantity }}</td>
+          <td>{{ row.total_revenue }} грн</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">Даних ще немає — жодного оплаченого замовлення.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
