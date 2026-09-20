@@ -13,7 +13,7 @@ class UserFactory(DjangoModelFactory):
 
     username = factory.Sequence(lambda n: f"user{n}")
     email = factory.LazyAttribute(lambda obj: f"{obj.username}@example.com")
-    
+
     @factory.post_generation
     def password(obj, create, extracted, **kwargs):
         """Хешує пароль і явно зберігає користувача (заміна автозбереження,
