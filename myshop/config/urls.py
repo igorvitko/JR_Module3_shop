@@ -18,7 +18,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     # Ендпоінти застосунків додаються поетапно (Етапи 3–7):
-    # path("api/products/", include("products.urls")),
+    path("api/", include("products.urls")),  # /api/products/, /api/categories/
     # path("api/cart/", include("cart.urls")),
     # path("api/orders/", include("orders.urls")),
     # path("api/users/", include("users.urls")),
