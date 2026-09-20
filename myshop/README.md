@@ -73,7 +73,8 @@ myshop/
 - [x] Етап 1 — Скелет проєкту, Docker (dev), налаштування dev/prod, CI-заглушка
 - [x] Етап 2 — Моделі даних (Category, Product, Cart/CartItem, Order/OrderItem, Review, Profile)
 - [x] Етап 3 — REST API каталогу (`/api/products/`, `/api/categories/`): фільтри, пошук, сортування, тести
-- [ ] Етап 4 — API товару та відгуків (`/api/products/<id>/reviews/`)
+- [x] Етап 4 — Відгуки (`/api/products/<id>/reviews/`) з перевіркою покупки, тести
+- [ ] Етап 5 — API кошика
 - [ ] Етап 5–6 — API кошика, користувачів
 - [ ] Етап 7 — API замовлень, permissions, Swagger
 - [ ] Етап 8 — Адмін-панель і аналітика
