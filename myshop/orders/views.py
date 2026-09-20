@@ -1,8 +1,10 @@
 """API-view замовлень: створення з кошика, перегляд історії, скасування."""
+from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
+from common.permissions import IsOwner
 from orders.models import Order
 from orders.serializers import OrderCreateSerializer, OrderSerializer
 
@@ -23,9 +25,13 @@ class OrderViewSet(
     - PATCH/PUT — дозволяють лише перевести статус у "cancelled";
     - DELETE — м'яке скасування (переводить у статус CANCELLED, запис
       із БД фізично не видаляється — потрібна історія замовлень).
+
+    Права доступу подвійні: get_queryset() фільтрує по user (основний
+    захист, дає 404 на чуже замовлення), а IsOwner — object-level
+    перевірка "про запас" (див. docstring у common/permissions.py).
     """
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
 
     def get_queryset(self):
         return (
@@ -38,6 +44,18 @@ class OrderViewSet(
             return OrderCreateSerializer
         return OrderSerializer
 
+    @extend_schema(
+        examples=[
+            OpenApiExample(
+                "Приклад запиту",
+                value={
+                    "shipping_address": "м. Одеса, вул. Дерибасівська, 1, кв. 5",
+                    "payment_method": "card",
+                },
+                request_only=True,
+            ),
+        ]
+    )
     def create(self, request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

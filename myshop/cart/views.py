@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.http import HttpRequest
 
+from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -76,6 +77,16 @@ class CartView(APIView):
         cart = self.get_cart(request)
         return Response(CartSerializer(cart).data)
 
+    @extend_schema(
+        request=CartItemWriteSerializer,
+        examples=[
+            OpenApiExample(
+                "Приклад запиту",
+                value={"product": 1, "quantity": 2},
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request: HttpRequest) -> Response:
         """Додає товар у кошик; якщо він уже там — збільшує кількість."""
         cart = self.get_cart(request)

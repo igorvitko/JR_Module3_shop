@@ -4,6 +4,7 @@
 rest_framework_simplejwt (TokenObtainPairView / TokenRefreshView) —
 див. users/urls.py, тут власного коду для них не потрібно.
 """
+from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 
@@ -15,6 +16,20 @@ from users.serializers import (
 )
 
 
+@extend_schema(
+    examples=[
+        OpenApiExample(
+            "Приклад запиту",
+            value={
+                "username": "ivan_petrenko",
+                "email": "ivan@example.com",
+                "password": "StrongPass123!",
+                "password2": "StrongPass123!",
+            },
+            request_only=True,
+        ),
+    ]
+)
 class RegisterView(generics.CreateAPIView):
     """Реєстрація нового користувача. Доступно без авторизації."""
 
