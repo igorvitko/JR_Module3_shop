@@ -22,7 +22,7 @@ urlpatterns = [
     path("api/products/<int:product_id>/", include("reviews.urls")),  # .../reviews/
     path("api/cart/", include("cart.urls")),
     # path("api/orders/", include("orders.urls")),
-    # path("api/users/", include("users.urls")),
+    path("api/users/", include("users.urls")),
 ]
 
 if settings.DEBUG:
