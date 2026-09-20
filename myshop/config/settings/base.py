@@ -146,3 +146,4 @@ SPECTACULAR_SETTINGS = {
 
 # --- Email (перевизначається у dev.py / prod.py) ---
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@myshop.local")
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")

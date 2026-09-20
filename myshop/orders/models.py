@@ -25,6 +25,13 @@ class Order(TimeStampedModel):
         DELIVERED = "delivered", "Доставлено"
         CANCELLED = "cancelled", "Скасовано"
 
+    class PaymentMethod(models.TextChoices):
+        """Спосіб оплати. Реальної інтеграції з платіжним провайдером немає —
+        це імітація/мок, як прямо дозволяє ТЗ (розділ 3.4)."""
+
+        CARD = "card", "Оплата карткою (мок)"
+        CASH_ON_DELIVERY = "cash_on_delivery", "Оплата при отриманні"
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -36,6 +43,12 @@ class Order(TimeStampedModel):
         choices=Status.choices,
         default=Status.PENDING,
         verbose_name="Статус",
+    )
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.CARD,
+        verbose_name="Спосіб оплати",
     )
     total_price = models.DecimalField(
         max_digits=10,
