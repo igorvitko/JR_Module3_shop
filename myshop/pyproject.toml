@@ -30,6 +30,7 @@ dev = [
     "mypy>=1.11,<1.12",
     "django-stubs[compatible-mypy]>=5.0,<5.1",
     "djangorestframework-stubs>=3.15,<3.16",
+    "ruff>=0.16.8",
 ]
 
 [tool.pytest.ini_options]
@@ -45,3 +46,37 @@ exclude = ["migrations/"]
 
 [tool.django-stubs]
 django_settings_module = "config.settings.dev"
+
+
+[tool.ruff]
+# Максимальная длина строки (как для Django/Black)
+line-length = 119
+
+# Папки, которые Ruff должен полностью игнорировать
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "staticfiles",
+    "media",
+]
+
+[tool.ruff.lint]
+# Включаем базовые правила (E, F) + правила isort (I) + специфичные для Django (DJ)
+select = ["E", "F", "I", "DJ"]
+
+# Игнорируем специфичные ошибки во всем проекте (например, E501 для длинных строк)
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Игнорируем неиспользуемые импорты и импорты со звездочкой в файлах настроек Django
+"**/settings.py" = ["F401", "F403"]
+# Игнорируем длинные строки в автоматически сгенерированных миграциях
+"**/migrations/*" = ["E501"]
+
+[tool.ruff.lint.isort]
+# Автоматически группировать импорты Django в отдельный блок после стандартных библиотек Python
+section-order = ["future", "standard-library", "third-party", "django", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+"django" = ["django"]

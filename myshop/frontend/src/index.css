@@ -1,0 +1,329 @@
+/* ==========================================================================
+   Дизайн-система Myshop
+   Палітра: паперовий фон + чорнильно-зелений акцент (не терракота/крем —
+   свідомо інша сімʼя кольорів). Fraunces (серифний, характерний) для
+   заголовків і логотипу, Inter — для інтерфейсу й основного тексту.
+   Структура — тонкими лініями, без "SaaS-карток" із тінями й радіусами
+   на кожному елементі.
+   ========================================================================== */
+
+:root {
+  --color-bg: #f1f3f2;
+  --color-surface: #ffffff;
+  --color-text: #1f2521;
+  --color-text-muted: #5b655f;
+  --color-accent: #2f5d50;
+  --color-accent-dark: #1f3f37;
+  --color-line: #d9dcd6;
+  --color-danger: #a23b3b;
+
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --content-width: 1120px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 0.5em;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --- Layout shell --- */
+
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.page-content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* --- Header --- */
+
+.site-header {
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface);
+}
+
+.site-header__inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.wordmark:hover {
+  text-decoration: none;
+  color: var(--color-accent);
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.main-nav__link {
+  color: var(--color-text-muted);
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+.main-nav__link:hover {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.main-nav__link.is-active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cart-link {
+  position: relative;
+  color: var(--color-text);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -14px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 999px;
+}
+
+.account-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.account-menu__name {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.link-button:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+/* --- Buttons --- */
+
+.button {
+  display: inline-block;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  padding: 0.55rem 1.1rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.button:hover {
+  text-decoration: none;
+  border-color: var(--color-text-muted);
+}
+
+.button--accent {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.button--accent:hover {
+  background: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Footer --- */
+
+.site-footer {
+  border-top: 1px solid var(--color-line);
+  background: var(--color-surface);
+}
+
+.site-footer__inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* --- Forms (login/register) --- */
+
+.auth-page {
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field span {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.field input {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.field input:focus {
+  border-color: var(--color-accent);
+}
+
+.form-error {
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.auth-switch {
+  margin-top: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* --- Placeholder pages (Етапи 11–12 наповнять реальним контентом) --- */
+
+.placeholder-page {
+  border: 1px dashed var(--color-line);
+  border-radius: 4px;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.placeholder-page h1 {
+  color: var(--color-text);
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 720px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
