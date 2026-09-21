@@ -225,3 +225,6 @@ local_docs/
 
 # node
 node_modules/
+
+#content
+media/
