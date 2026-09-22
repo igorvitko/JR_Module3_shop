@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 
 from cart.tests.factories import CartItemFactory
 from orders.models import Order
-from orders.tests.factories import OrderFactory
+from orders.tests.factories import OrderFactory, OrderItemFactory
 from products.tests.factories import ProductFactory
 from users.tests.factories import UserFactory
 
@@ -121,6 +121,34 @@ def test_cancel_pending_order_via_delete(api_client: APIClient) -> None:
     assert response.status_code == status.HTTP_200_OK
     order.refresh_from_db()
     assert order.status == Order.Status.CANCELLED
+
+
+def test_cancel_via_delete_restores_stock(api_client: APIClient) -> None:
+    user = UserFactory()
+    product = ProductFactory(stock=5)
+    order = OrderFactory(user=user, status=Order.Status.PENDING)
+    OrderItemFactory(order=order, product=product, quantity=3, price=product.price)
+    api_client.force_authenticate(user)
+
+    response = api_client.delete(order_detail_url(order.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    product.refresh_from_db()
+    assert product.stock == 8  # 5, що лишились на складі, + 3 повернуті
+
+
+def test_cancel_via_patch_restores_stock(api_client: APIClient) -> None:
+    user = UserFactory()
+    product = ProductFactory(stock=5)
+    order = OrderFactory(user=user, status=Order.Status.PAID)
+    OrderItemFactory(order=order, product=product, quantity=2, price=product.price)
+    api_client.force_authenticate(user)
+
+    response = api_client.patch(order_detail_url(order.id), {"status": "cancelled"})
+
+    assert response.status_code == status.HTTP_200_OK
+    product.refresh_from_db()
+    assert product.stock == 7  # 5 + 2 повернуті
 
 
 def test_cancel_shipped_order_forbidden(api_client: APIClient) -> None:

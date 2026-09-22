@@ -1,5 +1,7 @@
 """API-view замовлень: створення з кошика, перегляд історії, скасування."""
 from drf_spectacular.utils import OpenApiExample, extend_schema
+from django.db import transaction
+
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -7,6 +9,7 @@ from rest_framework.response import Response
 from common.permissions import IsOwner
 from orders.models import Order
 from orders.serializers import OrderCreateSerializer, OrderSerializer
+from products.models import Product
 
 
 class OrderViewSet(
@@ -25,6 +28,7 @@ class OrderViewSet(
     - PATCH/PUT — дозволяють лише перевести статус у "cancelled";
     - DELETE — м'яке скасування (переводить у статус CANCELLED, запис
       із БД фізично не видаляється — потрібна історія замовлень).
+      В обох випадках скасування товар повертається на склад.
 
     Права доступу подвійні: get_queryset() фільтрує по user (основний
     захист, дає 404 на чуже замовлення), а IsOwner — object-level
@@ -75,14 +79,44 @@ class OrderViewSet(
         if not order.can_be_cancelled:
             raise PermissionDenied("Це замовлення вже не можна скасувати.")
 
-        order.status = Order.Status.CANCELLED
-        order.save(update_fields=["status"])
+        with transaction.atomic():
+            self._restore_stock(order)
+            order.status = Order.Status.CANCELLED
+            order.save(update_fields=["status"])
 
     def destroy(self, request, *args, **kwargs) -> Response:
         order = self.get_object()
         if not order.can_be_cancelled:
             raise PermissionDenied("Це замовлення вже не можна скасувати.")
 
-        order.status = Order.Status.CANCELLED
-        order.save(update_fields=["status"])
+        with transaction.atomic():
+            self._restore_stock(order)
+            order.status = Order.Status.CANCELLED
+            order.save(update_fields=["status"])
         return Response(OrderSerializer(order).data)
+
+    @staticmethod
+    def _restore_stock(order: Order) -> None:
+        """Повертає товари на склад при скасуванні замовлення.
+
+        select_for_update — той самий захист від гонки, що й при
+        оформленні (OrderCreateSerializer.create): паралельне скасування
+        і паралельне оформлення нового замовлення на той самий товар не
+        повинні "загубити" одне з двох оновлень стоку. Товари, які вже
+        видалені з каталогу (product_id IS NULL — див. OrderItem.product,
+        SET_NULL), пропускаються: повертати наявність нема куди.
+        """
+        items = list(order.items.select_related("product"))
+        product_ids = [item.product_id for item in items if item.product_id]
+        if not product_ids:
+            return
+
+        locked_products = {
+            product.pk: product
+            for product in Product.objects.select_for_update().filter(pk__in=product_ids)
+        }
+        for item in items:
+            product = locked_products.get(item.product_id)
+            if product is not None:
+                product.stock += item.quantity
+                product.save(update_fields=["stock"])

@@ -7,7 +7,7 @@ import ProductCard from "../components/ProductCard";
 import ProductFilters from "../components/ProductFilters";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 8;
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
