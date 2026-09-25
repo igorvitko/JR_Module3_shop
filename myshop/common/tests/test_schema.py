@@ -34,3 +34,13 @@ def test_health_check_endpoint() -> None:
 
     assert response.status_code == 200
     assert response.data["status"] == "ok"
+
+
+def test_api_root_lists_all_main_endpoints() -> None:
+    client = APIClient()
+
+    response = client.get(reverse("api-root"))
+
+    assert response.status_code == 200
+    expected_keys = {"products", "categories", "cart", "orders", "register", "login", "docs"}
+    assert expected_keys.issubset(response.data.keys())

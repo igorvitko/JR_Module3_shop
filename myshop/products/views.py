@@ -2,6 +2,7 @@
 from django.db.models import Avg, Count, QuerySet
 
 from rest_framework import viewsets
+from rest_framework.serializers import BaseSerializer
 
 from products.filters import ProductFilter
 from products.models import Category, Product
@@ -39,7 +40,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             )
         )
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[BaseSerializer]:
         if self.action == "retrieve":
             return ProductDetailSerializer
         return ProductListSerializer

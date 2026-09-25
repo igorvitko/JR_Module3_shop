@@ -10,4 +10,7 @@ from users.models import Profile
 def create_profile_for_new_user(sender, instance, created: bool, **kwargs) -> None:
     """Автоматично створює Profile одразу після реєстрації користувача."""
     if created:
-        Profile.objects.create(user=instance)
+        # django-stubs у цій версії не завжди підхоплює менеджер objects
+        # для моделі, яка успадковує абстрактну базу (TimeStampedModel)
+        # з іншого застосунку; сам код коректний, тому ignore.
+        Profile.objects.create(user=instance)  # type: ignore[attr-defined]

@@ -13,7 +13,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     запиту — так неможливо залишити відгук "не на той" товар.
     """
 
-    user = serializers.StringRelatedField(read_only=True)
+    user: serializers.StringRelatedField = serializers.StringRelatedField(
+        read_only=True)
+
 
     class Meta:
         model = Review

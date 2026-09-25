@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def health_check(request):
+def health_check(request) -> Response:
     """Перевіряє, що застосунок запущений і має з'єднання з базою даних.
 
     Використовується для Docker healthcheck та ручної перевірки після

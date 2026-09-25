@@ -4,6 +4,9 @@
 rest_framework_simplejwt (TokenObtainPairView / TokenRefreshView) —
 див. users/urls.py, тут власного коду для них не потрібно.
 """
+from typing import cast
+
+from django.contrib.auth.models import User as AuthUser
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -44,7 +47,13 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self) -> Profile:
-        return self.request.user.profile
+        # permission_classes = [IsAuthenticated] гарантує в рантаймі, що
+        # request.user — не AnonymousUser, але mypy цього не знає з
+        # декоратора; cast повідомляє точний тип для доступу до .profile
+        # (django-stubs розпізнає зворотну зв'язку лише для конкретного
+        # класу User, не для абстрактного AbstractBaseUser).
+        user = cast(AuthUser, self.request.user)
+        return user.profile
 
 
 class ChangePasswordView(generics.GenericAPIView):

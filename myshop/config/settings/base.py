@@ -144,7 +144,8 @@ REST API для інтернет-магазину Myshop (Django + DRF).
 ## Авторизація (JWT)
 
 1. **Реєстрація**: `POST /api/users/register/` — username, email, password, password2.
-2. **Логін**: `POST /api/users/login/` — username + password → `{"access": "...", "refresh": "..."}`.
+2. **Логін**: `POST /api/users/login/` — username + password →
+`{"access": "...", "refresh": "..."}`.
 3. Передавайте access-токен у заголовку кожного захищеного запиту:
    `Authorization: Bearer <access>`. Час життя — 15 хв.
 4. Коли access протухне — `POST /api/users/login/refresh/` з `{"refresh": "..."}`

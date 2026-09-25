@@ -31,6 +31,7 @@ dev = [
     "django-stubs[compatible-mypy]>=5.0,<5.1",
     "djangorestframework-stubs>=3.15,<3.16",
     "ruff>=0.16.8",
+    "pytest-cov>=5.0,<6.0",
 ]
 
 [tool.pytest.ini_options]
@@ -44,9 +45,38 @@ python_version = "3.12"
 ignore_missing_imports = true
 exclude = ["migrations/"]
 
+# Тести навмисно виключені зі строгої перевірки: factory-boy не має
+# офіційних тайп-стабів (виклик ProductFactory() у рантаймі повертає
+# екземпляр Product, але статично mypy бачить лише клас фабрики), а
+# force_authenticate(user) у тестах DRF навмисно приймає "розхлябаний"
+# рантайм-об'єкт. Типізувати це строго — витрати часу без реальної
+# користі; сам код застосунку (не тести) перевіряється повністю.
+[[tool.mypy.overrides]]
+module = ["*.tests.*", "*.tests"]
+ignore_errors = true
+
 [tool.django-stubs]
 django_settings_module = "config.settings.dev"
 
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "manage.py",
+    "config/*",
+    "*/apps.py",
+    ".venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+show_missing = true
 
 [tool.ruff]
 # Максимальная длина строки (как для Django/Black)

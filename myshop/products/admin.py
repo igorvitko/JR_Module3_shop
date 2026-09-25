@@ -12,7 +12,7 @@ class LowStockFilter(admin.SimpleListFilter):
     title = "залишок на складі"
     parameter_name = "stock_level"
 
-    def lookups(self, request: HttpRequest, model_admin):
+    def lookups(self, request: HttpRequest, model_admin) -> list[tuple[str, str]]:
         return [("low", "Мало (< 5 од.)"), ("out", "Немає в наявності")]
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -36,7 +36,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
     @admin.display(description="К-сть товарів", ordering="_product_count")
     def product_count(self, obj: Category) -> int:
-        return obj._product_count
+        # _product_count додається динамічно через .annotate() у
+        # get_queryset() вище — mypy не бачить анотацій queryset, тому
+        # це очікуване й безпечне придушення попередження нижче.
+        return obj._product_count  # type: ignore[attr-defined]
 
 
 @admin.register(Product)

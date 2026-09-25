@@ -1,10 +1,15 @@
 """Серіалізатори реєстрації, профілю та зміни пароля."""
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from users.models import Profile
 
+# User — рантайм-значення get_user_model(), використовується як Meta.model
+# і для .objects.create_user(). Для анотацій типів використовуємо
+# AbstractBaseUser: mypy не дозволяє брати динамічну змінну як тип
+# (django-stubs спеціально не робить User валідним типом сам по собі).
 User = get_user_model()
 
 
@@ -27,7 +32,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"password2": "Паролі не збігаються."})
         return attrs
 
-    def create(self, validated_data: dict) -> User:
+    def create(self, validated_data: dict) -> AbstractBaseUser:
         return User.objects.create_user(
             username=validated_data["username"],
             email=validated_data.get("email", ""),
@@ -81,7 +86,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"new_password2": "Паролі не збігаються."})
         return attrs
 
-    def save(self, **kwargs) -> User:
+    def save(self, **kwargs) -> AbstractBaseUser:
         user = self.context["request"].user
         user.set_password(self.validated_data["new_password"])
         user.save()

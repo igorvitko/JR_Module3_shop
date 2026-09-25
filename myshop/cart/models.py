@@ -7,6 +7,7 @@ localStorage на фронтенді та передається в заголо
 у REST API так само, як і зовнішні клієнти.
 """
 import uuid
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
@@ -40,13 +41,14 @@ class Cart(TimeStampedModel):
         verbose_name_plural = "Кошики"
 
     def __str__(self) -> str:
-        owner = self.user.username if self.user_id else f"гість {self.token}"
-        return f"Кошик ({owner})"
+        if self.user is not None:
+            return f"Кошик ({self.user.username})"
+        return f"Кошик (гість {self.token})"
 
     @property
-    def total_price(self):
+    def total_price(self) -> Decimal:
         """Сума вартості всіх позицій кошика."""
-        return sum((item.subtotal for item in self.items.all()), start=0)
+        return sum((item.subtotal for item in self.items.all()), start=Decimal("0"))
 
     @property
     def total_items(self) -> int:
@@ -76,6 +78,6 @@ class CartItem(TimeStampedModel):
         return f"{self.product.name} x{self.quantity}"
 
     @property
-    def subtotal(self):
+    def subtotal(self) -> Decimal:
         """Вартість цієї позиції (ціна товару * кількість)."""
         return self.product.price * self.quantity

@@ -138,3 +138,13 @@ def test_guest_cart_merges_into_user_cart_on_login(api_client: APIClient) -> Non
     assert response.data["total_items"] == 2
     assert Cart.objects.filter(user=user).count() == 1
     assert not Cart.objects.filter(token=guest_token).exists()
+
+
+def test_malformed_cart_token_header_does_not_crash(api_client: APIClient) -> None:
+    """Довільний, не-UUID заголовок X-Cart-Token не повинен валити запит —
+    очікувана поведінка: трактувати його як "кошика немає" і створити новий."""
+    response = api_client.get(CART_URL, HTTP_X_CART_TOKEN="not-a-valid-uuid")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["items"] == []
+    assert response.data["token"]

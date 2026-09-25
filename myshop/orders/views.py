@@ -1,10 +1,15 @@
 """API-view замовлень: створення з кошика, перегляд історії, скасування."""
-from drf_spectacular.utils import OpenApiExample, extend_schema
+from typing import cast
+
+from django.contrib.auth.models import User as AuthUser
 from django.db import transaction
+from django.db.models import QuerySet
+from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 
 from common.permissions import IsOwner
 from orders.models import Order
@@ -37,13 +42,13 @@ class OrderViewSet(
 
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
-    def get_queryset(self):
-        return (
-            Order.objects.filter(user=self.request.user)
-            .prefetch_related("items")
-        )
+    def get_queryset(self) -> QuerySet[Order]:
+        # permission_classes = [IsAuthenticated] гарантує в рантаймі не-
+        # анонімного користувача; cast потрібен лише для mypy.
+        user = cast(AuthUser, self.request.user)
+        return Order.objects.filter(user=user).prefetch_related("items")
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[BaseSerializer]:
         if self.action == "create":
             return OrderCreateSerializer
         return OrderSerializer
@@ -67,11 +72,13 @@ class OrderViewSet(
         output_serializer = OrderSerializer(order, context=self.get_serializer_context())
         return Response(output_serializer.data, status=201)
 
-    def perform_update(self, serializer: OrderSerializer) -> None:
-        # serializer.instance — саме той об'єкт, який далі серіалізується у
-        # відповідь; якщо замість нього повторно зробити get_object(), у
-        # відповіді залишаться старі (несинхронізовані) дані.
-        order: Order = serializer.instance
+    def perform_update(self, serializer: BaseSerializer) -> None:
+        # Сигнатура супертипу (UpdateModelMixin) очікує BaseSerializer;
+        # тут це завжди OrderSerializer (єдиний non-create serializer
+        # цього view). serializer.instance — саме той об'єкт, який далі
+        # серіалізується у відповідь; якщо замість нього повторно
+        # зробити get_object(), у відповіді залишаться старі дані.
+        order = cast(Order, serializer.instance)
         new_status = self.request.data.get("status")
 
         if new_status != Order.Status.CANCELLED:
@@ -116,6 +123,8 @@ class OrderViewSet(
             for product in Product.objects.select_for_update().filter(pk__in=product_ids)
         }
         for item in items:
+            if item.product_id is None:
+                continue
             product = locked_products.get(item.product_id)
             if product is not None:
                 product.stock += item.quantity

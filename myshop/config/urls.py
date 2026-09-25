@@ -4,7 +4,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -13,7 +12,7 @@ from common.views import health_check
 
 
 @api_view(["GET"])
-def api_root(request, format=None):  # noqa: A002 — "format" це стандартне ім'я DRF
+def api_root(request, format=None) -> Response:  # noqa: A002 — "format" це стандартне ім'я DRF
     """Кореневий ендпоінт /api/ — ручний список основних ресурсів.
 
     Роутери застосунків навмисно на SimpleRouter (без автогенерованого
@@ -32,6 +31,7 @@ def api_root(request, format=None):  # noqa: A002 — "format" це станда
             "docs": reverse("swagger-ui", request=request, format=format),
         }
     )
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),

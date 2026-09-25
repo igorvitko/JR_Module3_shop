@@ -1,11 +1,11 @@
 """API-view кошика: єдиний ендпоінт /api/cart/ для GET/POST/PATCH/DELETE."""
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
-from django.http import HttpRequest
 
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -31,7 +31,7 @@ class CartView(APIView):
 
     permission_classes = [AllowAny]
 
-    def get_cart(self, request: HttpRequest) -> Cart:
+    def get_cart(self, request: Request) -> Cart:
         if request.user.is_authenticated:
             cart, _ = Cart.objects.get_or_create(user=request.user)
             self._merge_guest_cart_if_any(request, cart)
@@ -41,7 +41,7 @@ class CartView(APIView):
         return guest_cart or Cart.objects.create()
 
     @staticmethod
-    def _find_guest_cart(request: HttpRequest) -> Cart | None:
+    def _find_guest_cart(request: Request) -> Cart | None:
         token = request.headers.get("X-Cart-Token")
         if not token:
             return None
@@ -51,7 +51,7 @@ class CartView(APIView):
             # Некоректний формат токена — трактуємо як "кошика немає".
             return None
 
-    def _merge_guest_cart_if_any(self, request: HttpRequest, user_cart: Cart) -> None:
+    def _merge_guest_cart_if_any(self, request: Request, user_cart: Cart) -> None:
         guest_cart = self._find_guest_cart(request)
         if guest_cart is None or guest_cart.pk == user_cart.pk:
             return
@@ -72,7 +72,7 @@ class CartView(APIView):
                     )
             guest_cart.delete()
 
-    def get(self, request: HttpRequest) -> Response:
+    def get(self, request: Request) -> Response:
         """Повертає поточний кошик з позиціями та підсумковою сумою."""
         cart = self.get_cart(request)
         return Response(CartSerializer(cart).data)
@@ -87,7 +87,7 @@ class CartView(APIView):
             ),
         ],
     )
-    def post(self, request: HttpRequest) -> Response:
+    def post(self, request: Request) -> Response:
         """Додає товар у кошик; якщо він уже там — збільшує кількість."""
         cart = self.get_cart(request)
         serializer = CartItemWriteSerializer(data=request.data)
@@ -113,7 +113,7 @@ class CartView(APIView):
 
         return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
 
-    def patch(self, request: HttpRequest) -> Response:
+    def patch(self, request: Request) -> Response:
         """Встановлює точну кількість товару в кошику (не додає, а замінює)."""
         cart = self.get_cart(request)
         serializer = CartItemWriteSerializer(data=request.data)
@@ -138,7 +138,7 @@ class CartView(APIView):
         item.save(update_fields=["quantity"])
         return Response(CartSerializer(cart).data)
 
-    def delete(self, request: HttpRequest) -> Response:
+    def delete(self, request: Request) -> Response:
         """Видаляє одну позицію (?product=<id>) або очищає весь кошик."""
         cart = self.get_cart(request)
         product_id = request.query_params.get("product")
