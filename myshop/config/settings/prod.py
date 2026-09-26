@@ -35,12 +35,26 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # --- Безпека ---
-SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "True") == "True"
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# УВАГА: docker-compose.prod.yml + nginx у цьому проєкті обслуговують
+# лише звичайний HTTP (порт 80) — TLS-сертифікат не налаштований (для
+# цього потрібен реальний домен і, наприклад, certbot/Let's Encrypt —
+# поза межами обсягу навчального проєкту). Тому ці прапорці за
+# замовчуванням ВИМКНЕНІ: SECURE_SSL_REDIRECT=True без реального HTTPS
+# створив би нескінченний редирект, а *_COOKIE_SECURE=True — робив би
+# сесію/CSRF-кукі непрацюючими (браузер не надсилає їх по HTTP).
+#
+# Якщо деплоїте за реальним доменом із TLS (nginx+certbot або хмарний
+# балансувальник із HTTPS) — увімкніть усе це через .env:
+#   DJANGO_SECURE_SSL_REDIRECT=True
+#   DJANGO_SESSION_COOKIE_SECURE=True
+#   DJANGO_CSRF_COOKIE_SECURE=True
+#   DJANGO_SECURE_HSTS_SECONDS=2592000
+SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "False") == "True"
+SESSION_COOKIE_SECURE = os.environ.get("DJANGO_SESSION_COOKIE_SECURE", "False") == "True"
+CSRF_COOKIE_SECURE = os.environ.get("DJANGO_CSRF_COOKIE_SECURE", "False") == "True"
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
 
 # --- Email (реальний SMTP) ---
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
